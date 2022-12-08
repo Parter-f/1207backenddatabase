@@ -1,4 +1,5 @@
 import { Get, Controller, Render, Query, Param, Post, Body, Redirect } from '@nestjs/common';
+import { url } from 'inspector';
 import db from './db';
 import { PaintingDto } from './painting.dto';
 
@@ -9,7 +10,7 @@ export class AppController {
   async listPaintings(@Query('year') year = 1990) {
 
    const[ rows ] = await db.execute(
-    'SELECT id , title FROM paintings WHERE year > ?',
+    'SELECT id , title FROM paintings',
    [ year ]
    );
 
@@ -40,11 +41,23 @@ export class AppController {
   @Render('show')
  async showPainting(@Param('id') id: number){
     const [ rows ] = await db.execute(
-      'SELECT title , year , on_display FROM paintings WHERE id = ?',
+      'SELECT title , year , id, on_display FROM paintings WHERE id = ?',
       [ id ]
     );
     return { painting : rows[0]};
   }
 
+  @Post('paintings/:id/delete')
+  @Redirect()
+  async deletePainting(@Param('id') id:number){
+
+    await db.execute(
+      'DELETE FROM paintings WHERE id = ?',
+      [ id ]
+    )
+      return {url : '/'}
+  }
+
   
+   
 }
